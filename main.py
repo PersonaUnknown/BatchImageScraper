@@ -20,6 +20,7 @@ def download_image(image_url, file_dir):
         print(f"Failed to download the image. Status code: {response.status_code}")
 
 queries = []
+maxResults = 20
 licenses = [
     "Any",                # All Creative Commons
     "Public",             # Public Domain
@@ -34,12 +35,13 @@ license = licenses[option]
 with open('queries.txt', mode='r') as file:
     lines = file.readlines()
     for line in lines:
+        line = line.replace("\n", "").replace("/", "_")
         queries.append(line)
-driver = webdriver.Chrome()
 
 for query in queries:
     # Query DuckDuckGo
     url = f"https://duckduckgo.com/?q={query}&iax=images&ia=images&iaf=license%3A{license}"
+    driver = webdriver.Chrome()
     driver.get(url)
     for x in range(3):
         driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
@@ -57,7 +59,9 @@ for query in queries:
     if not os.path.exists(dir):
         os.mkdir(dir)
     for i, img in enumerate(images):
+        if i > maxResults:
+            break
         path = f"{dir}/image{i}.png"
         download_image(img, path)
     
-driver.quit()
+    driver.quit()
